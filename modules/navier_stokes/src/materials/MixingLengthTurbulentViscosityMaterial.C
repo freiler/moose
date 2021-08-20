@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADMixingLengthTurbulentViscosityMaterial.h"
+#include "MixingLengthTurbulentViscosityMaterial.h"
 
-registerMooseObject("NavierStokesApp", INSADMixingLengthTurbulentViscosityMaterial);
+registerMooseObject("NavierStokesApp", MixingLengthTurbulentViscosityMaterial);
 
 InputParameters
-INSADMixingLengthTurbulentViscosityMaterial::validParams()
+MixingLengthTurbulentViscosityMaterial::validParams()
 {
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription(
@@ -27,7 +27,7 @@ INSADMixingLengthTurbulentViscosityMaterial::validParams()
   return params;
 }
 
-INSADMixingLengthTurbulentViscosityMaterial::INSADMixingLengthTurbulentViscosityMaterial(const InputParameters & parameters)
+MixingLengthTurbulentViscosityMaterial::MixingLengthTurbulentViscosityMaterial(const InputParameters & parameters)
   : ADMaterial(parameters),
   _mesh_dimension(_mesh.dimension()),
   _grad_u(adCoupledGradient("u")),
@@ -41,7 +41,7 @@ INSADMixingLengthTurbulentViscosityMaterial::INSADMixingLengthTurbulentViscosity
   }
 
 void
-INSADMixingLengthTurbulentViscosityMaterial::computeQpProperties()
+MixingLengthTurbulentViscosityMaterial::computeQpProperties()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
