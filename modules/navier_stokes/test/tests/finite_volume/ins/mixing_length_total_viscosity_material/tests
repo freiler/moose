@@ -6,7 +6,7 @@
     input = mixing_length_total_viscosity.i
     exodiff = mixing_length_total_viscosity_out.e
     method = "!dbg"
-    requirement = 'The system shall be able to calculate the total turbulent viscosity based on the capped mixing length model.'
+    requirement = 'The system shall be able to calculate the material property comprising the total turbulent viscosity, based on the capped mixing length model.'
     ad_indexing_type = 'global'
     issues = '#18666'
     design = 'rans_theory.md MixingLengthTurbulentViscosityMaterial.md'
