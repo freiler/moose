@@ -93,13 +93,13 @@ class CivetExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Collecting CIVET results...")
         branch = self.get('branch')
+        remotes = mooseutils.git_remotes()
         for name, category in self.get('remotes').items():
             LOG.info("Gathering CIVET results for '%s'.", name)
             if category.get('download_test_results', self.get('download_test_results', True)):
                 repo_url = category.get('repo_url', 'https://github.com').rstrip('/')
                 repo_url += '/{}'.format(category.get('repo'))
 
-                remotes = mooseutils.git_remotes()
                 remote = remotes.get(repo_url, None)
                 if remote is None:
                     remote = '__MooseDocs.extensions.civet__'
@@ -132,9 +132,14 @@ class CivetExtension(command.CommandExtension):
 
             report_root = self.get('test_reports_location')
             if not self.translator.findPage(report_root, exact=True, throw_on_zero=False):
-                self.translator.addPage(pages.Directory(report_root, source=report_root))
+                self.translator.addPage(pages.Directory(report_root,
+                                                        base=self.translator.destination,
+                                                        source=report_root))
 
-            src = pages.Source('{}/index.md'.format(report_root), source='{}/index.md'.format(report_root),
+            src = pages.Source('{}/index.md'.format(report_root),
+                               output_extension='.md',
+                               base=self.translator.destination,
+                               source='{}/index.md'.format(report_root),
                                read=False, tokenize=False)
             self.translator.addPage(src)
 
@@ -145,7 +150,9 @@ class CivetExtension(command.CommandExtension):
                 count += 1
 
                 fullname = '{}/{}.md'.format(report_root, name)
-                src = pages.Source(fullname, source=fullname, read=False, tokenize=False, key=key)
+                src = pages.Source(fullname, source=fullname, read=False, tokenize=False, key=key,
+                                   output_extension='.md',
+                                   base=self.translator.destination)
                 self.translator.addPage(src)
 
             LOG.info("Creating CIVET result pages complete [%s sec.]", time.time() - start)
