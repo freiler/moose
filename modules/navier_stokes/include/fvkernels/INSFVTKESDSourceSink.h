@@ -10,25 +10,27 @@
 #pragma once
 
 #include "FVElementalKernel.h"
+#include "MathFVUtils.h"
+#include "INSFVMomentumResidualObject.h"
 #include "INSFVVelocityVariable.h"
 
 /**
- * Computes source the sink terms for the turbulent kinetic energy.
+ * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
  */
-class INSFVTKESourceSink : public FVElementalKernel
+class INSFVTKESDSourceSink : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
 
   virtual void initialSetup() override;
 
-  INSFVTKESourceSink(const InputParameters & parameters);
+  INSFVTKESDSourceSink(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;
 
 protected:
-  /// The dimension of the domain
+  /// The dimension of the simulation
   const unsigned int _dim;
 
   /// x-velocity
@@ -38,11 +40,8 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * _w_var;
 
-  /// epsilon - dissipation rate of TKE
-  const Moose::Functor<ADReal> * _epsilon;
-
-  /// omega - dissipation rate of TKE
-  const Moose::Functor<ADReal> * _omega;
+  /// Turbulent kinetic energy
+  const Moose::Functor<ADReal> & _k;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
@@ -56,40 +55,56 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Linearized model?
+  /// If the user wants to use the linearized model
   const bool _linearized_model;
 
   /// Method used for wall treatment
   const MooseEnum _wall_treatment;
 
-  /// C_mu constant
-  const Real _C_mu;
-
-  // Production Limiter Constant
-  const Real _C_pl;
-
   /// F1 blending function
-  const Moose::Functor<ADReal> * _F1;
+  const Moose::Functor<ADReal> & _F1;
+
+  /// Stored strain rate
+  std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
+  /// Map for the previous destruction field
+  std::map<const Elem *, Real> _old_destruction;
 
   /// Activate free-shear modification bool
   const bool _bool_free_shear_modficiation;
 
+  // Wall normal unit vectors at each cell
+  const Moose::Functor<ADRealVectorValue> * _wall_normal_unit_vectors;
+
+  // Activate vortex stretching modification
+  const bool _bool_vortex_stretching_modficiation;
+
   /// Activate free-shear modification bool
   const bool _bool_low_Re_modification;
 
+  /// Map for the previous nonlienar iterate
+  std::map<const Elem *, Real> _pevious_nl_sol;
+
   ///@{
-  /// Maps for wall treatement
+  /** Maps for wall treatment */
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
 
-  /// Closure coefficients for kOmega SST model
-  static constexpr Real _beta_infty = 0.09;
+  /// Model constants
+  static constexpr Real _C_mu = 0.09;
   static constexpr Real _beta_i_1 = 0.075;
   static constexpr Real _beta_i_2 = 0.0828;
-  // Limiting
-  static constexpr Real _c_pl = 10.0;
+  static constexpr Real _beta_infty = 0.09;
+  static constexpr Real _alpha_0 = 1.0 / 9.0;
+  static constexpr Real _sigma_omega_1 = 2.000;
+  static constexpr Real _sigma_omega_2 = 1.168;
+  static constexpr Real _gamma_infty_1 =
+      _beta_i_1 / _beta_infty - std::pow(0.41, 2) / (_sigma_omega_1 * std::sqrt(_beta_infty));
+  static constexpr Real _gamma_infty_2 =
+      _beta_i_2 / _beta_infty - std::pow(0.41, 2) / (_sigma_omega_2 * std::sqrt(_beta_infty));
   // Low-Re specific
-  static constexpr Real _Re_beta = 8.0;
+  static constexpr Real _Re_k = 6.0;
+  static constexpr Real _Re_omega = 2.95;
+  static constexpr Real _alpha_2_star = 1.0;
 };
