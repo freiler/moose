@@ -76,8 +76,8 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
   ADReal y_plus;
-  ADReal mut_log;             // turbulent log-layer viscosity
-  ADReal mu_wall;             // total wall viscosity to obtain the shear stress at the wall
+  ADReal mut_log; // turbulent log-layer viscosity
+  ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
 
   if (_wall_treatment == "eq_newton")
   {
