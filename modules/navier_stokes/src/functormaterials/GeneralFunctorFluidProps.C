@@ -40,6 +40,8 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "porosity");
   params.addRequiredParam<MooseFunctorName>(
       "characteristic_length", "characteristic length for Reynolds number calculation");
+
+  params.addPrivateParam<bool>("_skip_construction, false, "Whether to skip the construction of functor fluid properties in the GeneralFunctorFluidProps");
   return params;
 }
 
@@ -56,8 +58,12 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _rho(getFunctor<ADReal>(NS::density)),
     _mu_rampdown(getFunction("mu_rampdown")),
     _neglect_derivatives_of_density_time_derivative(
-        getParam<bool>("neglect_derivatives_of_density_time_derivative"))
+        getParam<bool>("neglect_derivatives_of_density_time_derivative")),
+  _skip_construction(getParam<bool>("_skip_construction")
 {
+if (_skip_construction)
+   return;
+
   //
   // Set material properties functors
   //
