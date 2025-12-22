@@ -656,28 +656,33 @@ LinearAssemblySegregatedSolve::solve()
 
   bool converged = residual_storage.converged;
 
-  std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
-  std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
-  ns_abs_tols.push_back(_pressure_absolute_tolerance);
+  // Assign residuals to general residual vector
+  // const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system +
+  //                                 _has_solid_energy_system + _pm_radiation_systems.size() +
+  //                                 _active_scalar_systems.size() +_turbulence_systems.size();
 
-  // Push back energy tolerances
-  if (_has_energy_system)
-    ns_abs_tols.push_back(_energy_absolute_tolerance);
-  if (_has_solid_energy_system)
-    ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
-  if (_has_pm_radiation_systems)
-    for (const auto radiation_tol : _pm_radiation_absolute_tolerance)
-      ns_abs_tols.push_back(radiation_tol);
-  if (_has_active_scalar_systems)
-    for (const auto scalar_tol : _active_scalar_absolute_tolerance)
-      ns_abs_tols.push_back(scalar_tol);
+  // std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
+  // std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
+  // ns_abs_tols.push_back(_pressure_absolute_tolerance);
 
-  // Push back turbulence tolerances
-  if (_has_turbulence_systems)
-    for (const auto turbulence_tol : _turbulence_absolute_tolerance)
-      ns_abs_tols.push_back(turbulence_tol);
+  // // Push back energy tolerances
+  // if (_has_energy_system)
+  //   ns_abs_tols.push_back(_energy_absolute_tolerance);
+  // if (_has_solid_energy_system)
+  //   ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
+  // if (_has_pm_radiation_systems)
+  //   for (const auto radiation_tol : _pm_radiation_absolute_tolerance)
+  //     ns_abs_tols.push_back(radiation_tol);
+  // if (_has_active_scalar_systems)
+  //   for (const auto scalar_tol : _active_scalar_absolute_tolerance)
+  //     ns_abs_tols.push_back(scalar_tol);
 
-  bool converged = false;
+  // // Push back turbulence tolerances
+  // if (_has_turbulence_systems)
+  //   for (const auto turbulence_tol : _turbulence_absolute_tolerance)
+  //     ns_abs_tols.push_back(turbulence_tol);
+
+  //bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
   if (_cht.enabled() && _should_solve_energy)
     _cht.initializeCHTCouplingFields();
@@ -739,6 +744,9 @@ LinearAssemblySegregatedSolve::solve()
           if (_cht.enabled())
           {
             _energy_system->computeGradients();
+            // if (_has_pm_radiation_systems)
+            //   for (const auto i : index_range(_pm_radiation_system_names))
+            //     _pm_radiation_systems[i]->computeGradients();
             _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
           }
 
@@ -765,21 +773,21 @@ LinearAssemblySegregatedSolve::solve()
     }
 
     // If we have participating media radiation equations, solve them here due to the strong coupling with temperature
-    if (_has_pm_radiation_systems)
-    {
-      _problem.execute(EXEC_NONLINEAR);
+    // if (_has_pm_radiation_systems)
+    // {
+    //   _problem.execute(EXEC_NONLINEAR);
 
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
-      for (const auto i : index_range(_pm_radiation_system_names))
-        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
-                     i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
-                                              *_pm_radiation_systems[i],
-                                              _pm_radiation_equation_relaxation[i],
-                                              _pm_radiation_linear_control,
-                                              _pm_radiation_l_abs_tol);
-    }
+    //   // We set the preconditioner/controllable parameters through petsc options. Linear
+    //   // tolerances will be overridden within the solver.
+    //   Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
+    //   for (const auto i : index_range(_pm_radiation_system_names))
+    //     ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+    //                  i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
+    //                                           *_pm_radiation_systems[i],
+    //                                           _pm_radiation_equation_relaxation[i],
+    //                                           _pm_radiation_linear_control,
+    //                                           _pm_radiation_l_abs_tol);
+    // }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
