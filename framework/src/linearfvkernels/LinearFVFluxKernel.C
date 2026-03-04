@@ -17,6 +17,12 @@ LinearFVFluxKernel::validParams()
   params.addParam<bool>("force_boundary_execution",
                         false,
                         "Whether to force execution of this object on all external boundaries.");
+                          params.addParam<bool>("force_boundary_execution",
+                        false,
+                      "Whether to force execution of this object on all external boundaries.");
+  params.addParam<bool>("skip_boundary_execution",
+                        false,
+                        "Whether to skip boundaries of this object on all external boundaries.");
   params.registerSystemAttributeName("LinearFVFluxKernel");
   return params;
 }
@@ -29,6 +35,7 @@ LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & params)
     _cached_matrix_contribution(false),
     _cached_rhs_contribution(false),
     _force_boundary_execution(getParam<bool>("force_boundary_execution")),
+    _skip_boundary_execution(getParam<bool>("skip_boundary_execution")),
     _dof_indices(2, 0),
     _matrix_contribution(2, 2),
     _rhs_contribution(2, 0.0)
@@ -82,7 +89,7 @@ LinearFVFluxKernel::addMatrixContribution()
     LinearFVBoundaryCondition * bc_pointer =
         _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
 
-    if (bc_pointer || _force_boundary_execution)
+    if ( (bc_pointer || _force_boundary_execution) && !_skip_boundary_execution )
     {
       if (bc_pointer)
         bc_pointer->setupFaceData(_current_face_info, _current_face_type);
@@ -146,7 +153,7 @@ LinearFVFluxKernel::addRightHandSideContribution()
     LinearFVBoundaryCondition * bc_pointer =
         _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
 
-    if (bc_pointer || _force_boundary_execution)
+    if ( (bc_pointer || _force_boundary_execution) && !_skip_boundary_execution )
     {
       if (bc_pointer)
         bc_pointer->setupFaceData(_current_face_info, _current_face_type);

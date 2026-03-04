@@ -61,6 +61,7 @@ LinearFVDivergence::computeBoundaryMatrixContribution(const LinearFVBoundaryCond
 Real
 LinearFVDivergence::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & /*bc*/)
 {
+  //std::cout << "LFDiv : " << computeFaceFlux() << std::endl;
   return computeFaceFlux();
 }
 

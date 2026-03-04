@@ -232,6 +232,6 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
     grad_contrib +=
         normal_scaled_diff_tensor * boundary_grad * boundary_normal_multiplier * correction_vector;
   }
-
+  //std::cout << "LFVDiff: " << grad_contrib * _current_face_area << std::endl ;
   return grad_contrib * _current_face_area;
 }

@@ -42,8 +42,10 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
                              : _current_face_info->neighborInfo();
   const Real distance = computeCellToFaceDistance();
 
+  //std::cout << "grad(p)" << _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+    //         std::max(_Ainv(face_arg, determineState())(0), 1e-8) << std::endl;
   return _var.getElemValue(*elem_info, determineState()) -
-         _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+         0.*_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
              std::max(_Ainv(face_arg, determineState())(0), 1e-8) *
              distance; // We use the 0th component of Ainv. Components of Ainv are
                        // equal for most applications, and Ainv(0) has a value for 1D,2D,3D.

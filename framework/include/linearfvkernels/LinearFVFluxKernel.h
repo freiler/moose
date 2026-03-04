@@ -107,6 +107,9 @@ protected:
   /// Whether to force execution of this kernel on all external boundaries
   const bool _force_boundary_execution;
 
+    /// Whether to skip all of the boundaries
+  const bool _skip_boundary_execution;
+
   /// A vector of dof indices that describe where to add the
   /// matrix and right hand side batch contribution
   DenseVector<dof_id_type> _dof_indices;

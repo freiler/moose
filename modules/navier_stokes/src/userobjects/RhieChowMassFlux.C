@@ -383,6 +383,7 @@ RhieChowMassFlux::computeFaceMassFlux()
 
       // On the boundary, only the element side has a contribution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
+      std::cout << "h/a: " << -_HbyA_flux[fi->id()] << "gradp: " << p_grad_flux << std::endl;
     }
     // Compute the new face flux
     _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
