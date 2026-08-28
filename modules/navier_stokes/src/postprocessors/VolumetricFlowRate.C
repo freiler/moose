@@ -166,7 +166,8 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
                                     elem,
                                     nullptr}),
                     state));
-  return face_flux * adv_quant_face;
+  Real consistency_multiplier = fi->normal() * VectorValue(0, 1, 0) / abs(fi->normal() * VectorValue(0, 1, 0));
+  return consistency_multiplier * face_flux * adv_quant_face;
 }
 
 Real
